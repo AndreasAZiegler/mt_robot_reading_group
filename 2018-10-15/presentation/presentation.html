@@ -134,6 +134,7 @@ Uniform B-splines have a fixed time interval `\(\Delta t\)`
 
 * Trajectory does not pass through the control points
     * For local replanning not very important 
+
 ---
 
 # Approach
@@ -162,15 +163,101 @@ Uniform B-splines have a fixed time interval `\(\Delta t\)`
 
 ## 3D Circular Buffer
 .center[<img src="images/Circular_Buffer_Animation.gif" width="350">]
-
-* Check if a voxel is in the buffer: `\(\text{insideVolume}(x) = 0 \le x - o < N \)`, where `\(o\)` is the offset
+* Check if a voxel is in the buffer: `\( \text{insideVolume}(x) = 0 \le x - o < N \)`, where `\(o\)` is the offset
 
 * Find address: `\(\text{address}(x) = (x - o)\; \text{mod}\; N \)`
 
 ---
 
+# Approach
+
+## Local Environment Map
+
+### Distance map computation
+* Compute the Euclidean distance transform (EDT)
+* For fast collision checking
+* Checking for collision by one look-up query
+.center[<img src="images/EDT.png" width="450">]
+
+---
+
+# Approach
+
+### Trajectory Optimization
+
+The local replanning problem represented as an optimization
+
+`$$ E_{\text{total}} = E_{\text{ep}} + E_c + E_q + E_l $$`
+
+with
+
+`\( E_{\text{ep}} \)` an endpoint cost function
+
+`\( E_{c} \)` a collision cost function
+
+`\( E_{q} \)` cost of the integral over the squared derivatives
+
+`\( E_{l} \)` soft limit on the norm of time derivatives
+
+---
+
+# Approach
+
+### Trajectory Optimization
+
+`\( E_{\text{ep}} \)` an endpoint cost function:
+
+* Keep the local trajectory close to the global one
+`\( E_{\text{ep}} = \lambda_p ( p(t_{ep}) - p_{ep})^2 + \lambda_v (p^{'} (t_{ep} ) - p^{'}_{ep} )^2 \)`
+
+`\( E_{c} \)` a collision cost function:
+* Penalizes the trajectory point that are close to obstacles
+
+---
+
+# Approach
+
+### Trajectory Optimization
+
+`\( E_{q} \)` cost of the integral over the squared derivatives:
+* For smoothness
+
+`\( E_{l} \)` soft limit on the norm of time derivatives:
+* To ensure that velocity, acceleration and higher derivatives of position remain bounded.
+
+---
+
+# Approach
+
+## Implementation
+
+* First a global trajectory is computed
+
+* In every iteration the endpoint constraints are set to the position and velocity of the global trajectory at `\( t_{ep} \)`
+
+* The collision cost is evaluated using the circular buffer
+
+---
+
 # Results
 
+## Circular Buffer Performance
+
+<img src="images/circular-buffer-performance.jpg" width="1100">
+
+---
+
+# Results
+
+## Optimization performance & System simulation
+
+<img src="images/table-1.png" width="450"><img src="images/table-2.png" width="450" style="vertical-align:top">
+
+---
+
+# Results
+
+<iframe width="983" height="500" src="https://www.youtube.com/embed/jh6tMHjxHSY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 ---
 
 # Discussion
