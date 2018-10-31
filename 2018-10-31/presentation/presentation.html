@@ -64,15 +64,29 @@ IEEE RSJ Int. Conf. Intelligent Robots and Systems, 2010
 # Related Work
 
 * Early work with kinematics constraints progressed:
+
     1. With classical Dubins car
+
     2. Reeds-Shepp car
+
     3. Simple car
 
+---
+
+# Related Work
+
 * Single robot navigation through cluttered environment
+
     * Some based on velocity obstacles and its extensions
+<img src="images/vo_1.png" width="400"><img src="images/vo_2.png" width="415">
+---
+
+# Related Work
 
 * Decoupled or centralized planners
+
     * Decoupled: Consider every robot separately
+
     * Centralized: Combining the degrees of freedom of each robot
 
 ---
@@ -160,7 +174,7 @@ $$ \mathbf{v} = M(\theta) \cdot \mathbf{u} $$
 Obtain wheel speeds `\( v_l,\; v_r \)` from velocity `\( \mathbf{v} \)` by solving
 
 `
-$$ \mathbf{u} = M^{-1}(\theta) $$
+$$ \mathbf{u} = M^{-1}(\theta) \cdot \mathbf{v} $$
 `
 
 ---
