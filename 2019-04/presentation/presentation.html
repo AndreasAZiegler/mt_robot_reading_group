@@ -21,6 +21,9 @@
       } .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
       .remark-slide-content { font-size: 30px; }
 
+      th { font-family: 'Ubuntu Mono';
+           font-weight: normal;
+           font-size: 22pt; }
     </style>
     <style type="text/css" media="screen">
       code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
@@ -33,7 +36,7 @@ class: center, middle
 
 # MT Robot Reading Group
 
-## Past, Present, and Future of Simultaneous Localization and Mapping:
+## Past, Present, (and Future) of Simultaneous Localization and Mapping:
 
 ### Toward the Robust-Perception Age
 
@@ -45,16 +48,26 @@ T-RO 2016
 
 # Agenda
 
+--
 1. Introduction
 
-2. Related Work
+--
 
-3. Methodology
-  * Map Representation
-  * Global Planning
-  * Local Planning / Control
+2. SLAM problem formulation
 
-4. Performance
+--
+
+2. Anatomy of a modern SLAM system
+
+  * Front end
+
+  * Back end
+
+--
+
+4. Available systems
+
+--
 
 5. Discussion
 
@@ -64,13 +77,17 @@ T-RO 2016
 
 * Simultaneous Localization and Mapping (SLAM):
 
+--
+
  * Simultaneous estimation of the state of a robot
+
+--
 
  * Construction of a model of the environment
 
 ---
 
-<iframe width="1024" height="576" src="https://www.youtube.com/embed/ufvPS5wJAx0?start=40autoplay=1&" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="1024" height="576" src="https://www.youtube.com/embed/ufvPS5wJAx0?start=40&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ---
 
@@ -78,13 +95,20 @@ T-RO 2016
 
 * Map
 
+--
+
  * Can be used for navigation & planning
+
+--
 
  * Can be used to counteract drift in the estimation
 
+--
+
+<div style="position: relative; left: -11.5%;">
 <table>
   <tr>
-    <th>Voxels</th>
+    <th><p>Voxels</p></th>
     <th>Point clouds</th>
     <th>Topological maps</th>
   </tr>
@@ -94,12 +118,14 @@ T-RO 2016
     <td><img src="figures/topomap.png" width="380"></td>
   </tr>
 </table>
+</div>
 
 ---
 
 # Introduction
 
 ## Three periods of SLAM
+
 * The classical age (1986-2004)
 
 * Algorithmic-Analysis age (2004-2015)
@@ -108,14 +134,18 @@ T-RO 2016
 
 ---
 
-# Anatomy of a modern SLAM system
+# SLAM problem formulation
 
-* Front end: Abstracts sensor data into a models
-
-* Back end: Performs inference on the abstracted data
-
-
-.center[<img src="figures/front-backend.png" width="1000">]
+<table>
+  <tr>
+    <th><img src="figures/slam-problem.gif" width="550"></th>
+    <th style="text-align: left; vertical-align: text-top;">
+      <p>$ x_k, m_k \in \mathcal{X} $: Trajectory and landmarks</p>
+      <p>$ u_k, z_k \in Z $: Measurements</p>
+      <p><b>Goal:</b> $ \mathcal{X}^{\star} \doteq \underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(\mathcal{X} | Z) $</p>
+    </th>
+  </tr>
+</table>
 
 ---
 
@@ -124,21 +154,21 @@ T-RO 2016
 * A maximum a posteriori estimation problem
 
 `
-$$ \mathcal{X}^{\star} \doteq \underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(\mathcal{X} | Z)=\underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(Z | \mathcal{X}) \mathrm{p}(\mathcal{X}) $$
+$$ \mathcal{X}^{\star} \doteq \underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(\mathcal{X} | Z) = \underset{\mathcal{X}}{\operatorname{argmax}} \frac{\mathrm{p}(Z | \mathcal{X}) \mathrm{p}(\mathcal{X})}{\mathrm{p}(Z)} =\underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(Z | \mathcal{X}) \mathrm{p}(\mathcal{X}) $$
 `
 
 
-* where `\( \mathcal{X} \)` typically includes the trajectory and the landmarks
+* where $ \mathcal{X} $ typically includes the trajectory and the landmarks
 
-* `\( Z = \{ z_k : k = 1,..., m\} \)` are a set of measurements
+* $ Z = \{ z_k : k = 1,..., m\} $  are a set of measurements
 
-  * `\( z_k = h_k( \mathcal{X}_k ) + \epsilon_k \)` with known `\( h_k( \cdot ) \)`
+  * $ z_k = h_k( \mathcal{X}_k ) + \epsilon_k $ with known $ h_k( \cdot ) $
 
 ---
 
 # SLAM problem formulation
 
-* Assuming the measurements `\( Z \)` are independent
+* Assuming the measurements $ Z $ are independent
 
   * Noises are uncorrelated
 
@@ -160,7 +190,7 @@ $$ \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{ar
 
 * SLAM interpreted as inference over a factor graph
 
-.center[<img src="figures/factor-graph.png" width="400">]
+.center[<img src="figures/slam-problem.gif" width="280"><img src="figures/factor-graph.png" width="400">]
 
 * The variables correspond to nodes in the factor graph
 
@@ -174,6 +204,8 @@ $$ \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{ar
 ## More explicit
 
 * Assuming measurement noise to be zero-mean Gaussian noise with information matrix `\( \Omega_k \)`
+
+--
 
 * Measurement likelihood becomes:
 
@@ -205,7 +237,11 @@ $$ \mathrm{p}(\mathcal{X}) \propto \exp \left(-\frac{1}{2}\left\|h_{0}(\mathcal{
 
 Maximizing the posterior: `\( \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{argmax}} \mathrm{p}(\mathcal{X}) \prod_{k=1}^{m} \mathrm{p}\left(z_{k} | \mathcal{X}_{k}\right) \end{aligned} \)`
 
-... is the same as minimizing *negative log-posterior*:
+--
+
+... is the same as minimizing the *negative log-posterior*:
+
+--
 
 `
 $$ \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{argmin}}-\log \left(\mathrm{p}(\mathcal{X}) \prod_{k=1}^{m} \mathrm{p}\left(z_{k} | \mathcal{X}_{k}\right)\right) \\ &=\underset{\mathcal{X}}{\operatorname{argmin}} \sum_{k=0}^{m}\left\|h_{k}\left(\mathcal{X}_{k}\right)-z_{k}\right\|_{\Omega_{k}}^{2} \end{aligned} $$
@@ -213,21 +249,25 @@ $$ \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{ar
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
-Minimizing *negative log-posterior*
+Minimizing the *negative log-posterior*:
 
 `
 $$ \begin{aligned} \mathcal{X}^{\star} &=\underset{\mathcal{X}}{\operatorname{argmin}}-\log \left(\mathrm{p}(\mathcal{X}) \prod_{k=1}^{m} \mathrm{p}\left(z_{k} | \mathcal{X}_{k}\right)\right) \\ &=\underset{\mathcal{X}}{\operatorname{argmin}} \sum_{k=0}^{m}\left\|h_{k}\left(\mathcal{X}_{k}\right)-z_{k}\right\|_{\Omega_{k}}^{2} \end{aligned} $$
 `
 
-is a nonlinear least squares problem
+--
+
+... is a nonlinear least squares problem
+
+--
 
   * Similar to *bundle adjustment* known from Computer Vision
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
 ## Bundle adjustment
 
@@ -235,7 +275,7 @@ is a nonlinear least squares problem
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
 ## Solving the nonlinear least squares problem
 
@@ -245,7 +285,17 @@ is a nonlinear least squares problem
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
+
+## Solving the nonlinear least squares problem
+
+* Matrix appearing in the linearized problem is sparse
+
+.center[<img src="figures/sparsity.png" width="500">]
+
+---
+
+# SLAM problem formulation
 
 ## Solving the nonlinear least squares problem
 
@@ -253,15 +303,17 @@ is a nonlinear least squares problem
 
   * Enables the use of fast linear solvers
 
-  * Current SLAM libraries solve problems with tens of thousands of variables in few seconds
+  * Current SLAM libraries solve problems with tens of thousands of variables in a few seconds
 
 .center[<img src="figures/sparsity.png" width="400">]
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
 * Early SLAM systems were based on nonlinear filtering
+
+--
 
   * e.g. (Extended) Kalman Filter, particle filter
 
@@ -269,23 +321,32 @@ is a nonlinear least squares problem
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
 * Current SLAM systems are based on maximum a posteriori estimation
 
-  * More accurate and efficient
+--
 
 .center[<img src="figures/graph-1.png" width="700">]
 
 ---
 
-# SLAM problem formulation / back-end
+# SLAM problem formulation
 
 * Current SLAM systems are based on maximum a posteriori estimation
 
-  * More accurate and efficient
-
 .center[<img src="figures/graph-2.png" width="800">]
+
+---
+
+# Anatomy of a modern SLAM system
+
+* Front end: Abstracts sensor data into a models
+
+* Back end: Performs inference on the abstracted data
+
+
+.center[<img src="figures/front-backend.png" width="1000">]
 
 ---
 
@@ -333,48 +394,83 @@ is a nonlinear least squares problem
 
 ---
 
-<style>
-  .remark-slide-content {padding-left: 60px;}
-</style>
+# Further directions
 
-# Different level of map details
+---
 
+# Further directions
+
+<div style="position: relative; left: -11.5%;">
 <table>
   <tr>
-    <th>Sparse SLAM</th>
-    <th>Semi dense SLAM</th>
-    <th>Dense SLAM</th>
+    <th>Event based cameras</th>
+    <th>Deep Learning & SLAM</th>
+    <th>Semantic SLAM</th>
   </tr>
   <tr>
-    <td><iframe width="358" height="202" src="https://www.youtube.com/embed/8DISRmsO2YQ?start=12" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
-    <td><iframe width="358" height="202" src="https://youtube.com/embed/HlBmq70LKrQ?start=8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
-    <td><iframe width="358" height="202" src="https://youtube.com/embed/XySrhZpODYs?start=78" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/0hDGFFJQfmA?start=26&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/sLZOeC9z_tw?start=83?start=8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/Jvl42VJmYxg?start=5?start=78" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
   </tr>
 </table>
+</div>
+
+---
+
+# Further directions
+
+<div style="position: relative; left: -11.5%;">
+<table>
+  <tr>
+    <th>Event based cameras</th>
+    <th>Deep Learning & SLAM</th>
+    <th>Semantic SLAM</th>
+  </tr>
+  <tr>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/0hDGFFJQfmA?start=26" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/sLZOeC9z_tw?start=83&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/Jvl42VJmYxg?start=5?start=78" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+  </tr>
+</table>
+</div>
+
+---
+
+# Further directions
+
+<div style="position: relative; left: -11.5%;">
+<table>
+  <tr>
+    <th>Event based cameras</th>
+    <th>Deep Learning & SLAM</th>
+    <th>Semantic SLAM</th>
+  </tr>
+  <tr>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/0hDGFFJQfmA?start=26" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/sLZOeC9z_tw?start=83" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+    <td><iframe width="394" height="222" src="https://www.youtube.com/embed/Jvl42VJmYxg?start=5&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
+  </tr>
+</table>
+</div>
 
 ---
 
 # Available systems
 
 * Back ends:
-
   * gtsam (iSAM, iSAM2) (BSD License)
-
   * g2o (BSD License)
-
   * Google Ceres (New BSD License)
 
 * SLAM systems:
-
   * Google Cartographer (Apache 2.0 License)
-
   * Maplab (Apache 2.0 License)
-
   * VINS-Fusion (GNU GPL v3.0)
-
   * RTAB-Map (BSD License)
 
 ---
+
+# Questions & Discussion
 
     </textarea>
     <script type="text/javascript">
@@ -387,6 +483,7 @@ is a nonlinear least squares problem
       // Setup MathJax
       MathJax.Hub.Config({
           tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']],
           skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
           }
       });
